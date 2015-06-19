@@ -3,9 +3,9 @@
 #include <string.h>
 #define MAX_ALUNOS 100
 #define MAX_PROFESSORES 100
-#define MAX_DISCIPLINA 100
+#define MAX_TURMA 100
 
-void cadastrar_aluno(void);
+void incluir_aluno(void);
 void menu_aluno(void);
 void menu_professor(void);
 void cadastrar_professor(void);
@@ -13,42 +13,46 @@ void visualizar_professores(void);
 
 struct ALUNO
 {
-    char NOME[50];
-    char MATRICULA[10];
-    int SS;
-    int MS;
-    int MM;
-    int MI;
-    int II;
-    int SR;
+    char nome[50];
+    char matricula[10];
+    int idade;
+    char telefone[12];
+    char celular[12];
+    char endereco[30];
+    float ira;
 };
 
 struct PROFESSOR
 {
-    char NOME[50];
-    char MATRICULA[50];
-    
+    char nome[50];
+    char matricula[10];
+    int idade;
+    char telefone[12];
+    char celular[12];
+    char endereco[30];
 };
 
-struct DISCIPLINA
+struct TURMA
 {
-    char NOME[50];
-    char MATRICULA[50];
-    
+    char nome[50];
+    char codigo[10];
+    char numero_turma[3];
+    struct PROFESSOR* professor;
+    struct ALUNO* alunos[50];
 };
 
 struct ALUNO aluno[MAX_ALUNOS];
 struct PROFESSOR professor[MAX_PROFESSORES];
-struct DISCIPLINA disciplina[MAX_DISCIPLINA];
+struct TURMA turma[MAX_TURMA];
 
 int numero_alunos = 0;
 int numero_professores = 0;
-int numero_disciplinas = 0;
+int numero_turmas = 0;
 
 //Arquivos
 FILE *arquivo_alunos;//Arquivo para gravar informações dos alunos cadastrados
 FILE *arquivo_professores;//Arquivo para gravar informações dos professores cadastrados
-FILE *arquivo_displinas;//Arquivo para gravar informações das disciplinas cadastrados
+FILE *arquivo_turmas;//Arquivo para gravar informações das turmas cadastrados
 
 //Função para Importar Dados do Arquivo para Vetor de Structs de Alunos
 void importar_alunos()
@@ -59,14 +63,13 @@ void importar_alunos()
     {
         while(!feof(arquivo_alunos))
         {
-            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].NOME);
-            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].MATRICULA);
-            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].SS);
-            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].MS);
-            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].MM);
-            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].MI);
-            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].II);
-            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].SR);
+            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].nome);
+            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].matricula);
+            fscanf(arquivo_alunos,"%d",&aluno[numero_alunos].idade);
+            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].telefone);
+            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].celular);
+            fscanf(arquivo_alunos,"%s",aluno[numero_alunos].endereco);
+            fscanf(arquivo_alunos,"%f",&aluno[numero_alunos].ira);
             numero_alunos++;
         }
         numero_alunos--;
@@ -83,8 +86,12 @@ void importar_professores()
     {
         while(!feof(arquivo_professores))
         {
-            fscanf(arquivo_professores,"%s",professor[numero_professores].NOME);
-            fscanf(arquivo_professores,"%s",professor[numero_professores].MATRICULA);
+            fscanf(arquivo_professores,"%s",professor[numero_professores].nome);
+            fscanf(arquivo_professores,"%s",professor[numero_professores].matricula);
+            fscanf(arquivo_professores,"%d",&professor[numero_professores].idade);
+            fscanf(arquivo_professores,"%s",professor[numero_professores].telefone);
+            fscanf(arquivo_professores,"%s",professor[numero_professores].celular);
+            fscanf(arquivo_professores,"%s",professor[numero_professores].endereco);
             numero_professores++;
         }
         numero_professores--;
@@ -92,61 +99,113 @@ void importar_professores()
     fclose(arquivo_professores);
 }
 
-void cadastrar_aluno(void)
+//Função para exportar aluno para arquivo
+void escrever_arquivo_aluno()
+{
+    //Abertura do arquivo para Escrita
+    arquivo_alunos = fopen("alunos.txt","a+");
+    
+    //Exportar dados dos alunos para arquivo
+    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].nome);
+    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].matricula);
+    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].idade);
+    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].telefone);
+    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].celular);
+    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].endereco);
+    fprintf(arquivo_alunos,"%f\n",aluno[numero_alunos].ira);
+    
+    //Fechar arquivo
+    fclose(arquivo_alunos);
+}
+
+//Função para exportar professor para arquivo
+void escrever_arquivo_professor()
+{
+    //Abertura do arquivo para Escrita
+    arquivo_professores = fopen("professores.txt","a+");
+    
+    //Exportar dados da turma para arquivo
+    fprintf(arquivo_professores,"%s\n",professor[numero_professores].nome);
+    fprintf(arquivo_professores,"%s\n",professor[numero_professores].matricula);
+    fprintf(arquivo_professores,"%d\n",professor[numero_professores].idade);
+    fprintf(arquivo_professores,"%s\n",professor[numero_professores].telefone);
+    fprintf(arquivo_professores,"%s\n",professor[numero_professores].celular);
+    fprintf(arquivo_professores,"%s\n",professor[numero_professores].endereco);
+    
+    //Fechar arquivo
+    fclose(arquivo_professores);
+}
+
+void incluir_aluno()
 {
     system("CLS");
     
     ///Recebendo os dados
     printf("\n\tCadastro de aluno\n");
     
-    printf("\nInsira o nome: ");
-    scanf("%s", aluno[numero_alunos].NOME);
+    printf("\nNome: ");
+    scanf("%s", aluno[numero_alunos].nome);
     setbuf(stdin,NULL);
     
-    printf("\nInsira a matricula: ");
-    scanf("%s", aluno[numero_alunos].MATRICULA);
+    printf("\nMatricula: ");
+    scanf("%s", aluno[numero_alunos].matricula);
     setbuf(stdin,NULL);
     
-    printf("\nInsira a quantidade de SS do aluno: ");
-    scanf("%d", &aluno[numero_alunos].SS);
+    printf("\nIdade: ");
+    scanf("%d", &aluno[numero_alunos].idade);
     
-    printf("\nInsira a quantidade de MS do aluno: ");
-    scanf("%d", &aluno[numero_alunos].MS);
+    printf("\nTelefone: ");
+    scanf("%s", aluno[numero_alunos].telefone);
+    setbuf(stdin,NULL);
     
-    printf("\nInsira a quantidade de MM do aluno: ");
-    scanf("%d", &aluno[numero_alunos].MM);
+    printf("\nCelular: ");
+    scanf("%s", aluno[numero_alunos].celular);
+    setbuf(stdin,NULL);
     
-    printf("\nInsira a quantidade de MI do aluno: ");
-    scanf("%d", &aluno[numero_alunos].MI);
+    printf("\nEndereco: ");
+    scanf("%s", aluno[numero_alunos].endereco);
+    setbuf(stdin,NULL);
     
-    printf("\nInsira a quantidade de II do aluno: ");
-    scanf("%d", &aluno[numero_alunos].II);
-    
-    printf("\nInsira a quantidade de SR do aluno: ");
-    scanf("%d", &aluno[numero_alunos].SR);
+    printf("\nIRA: ");
+    scanf("%f", &aluno[numero_alunos].ira);
     
     ///Escrevendo em um arquivo
     printf("\n\nArquivando Dados!");
     
-    //Abertura do arquivo para Escrita
-    arquivo_alunos = fopen("alunos.txt","a+");
-    
-    //Exportar dados dos alunos para arquivo
-    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].NOME);
-    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].MATRICULA);
-    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].SS);
-    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].MS);
-    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].MM);
-    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].MI);
-    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].II);
-    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].SR);
-    
-    //Fechar arquivo
-    fclose(arquivo_alunos);
+    escrever_arquivo_aluno();
     
     numero_alunos++;
     
     printf("\n\nDados Armazenado com sucesso!\nRetornando ao Menu - Alunos!\n\n");
+}
+
+//Função para incluir professor no arquivo de professores
+void incluir_professor()
+{
+    
+    system("CLS");
+    
+    ///Recebendo os dados
+    printf("\n\tCadastro de professor\n");
+    
+    printf("\nInsira o nome: ");
+    scanf("%s", professor[numero_professores].nome);
+    setbuf(stdin,NULL);
+    
+    printf("\nInsira a matricula: ");
+    scanf("%s", professor[numero_professores].matricula);
+    setbuf(stdin,NULL);
+    
+    ///Escrevendo em um arquivo
+    printf("\n\nArquivando Dados!");
+    
+    escrever_arquivo_professor();
+    
+    numero_professores++;
+    
+    printf("\n\nDados Armazenado com sucesso!\nRetornando ao Menu - Professor!\n\n");
+    
+    getch();
 }
 
 void visualizar_alunos()
@@ -158,13 +217,35 @@ void visualizar_alunos()
     {
         for(i=0;i<numero_alunos;i++)
         {
-            printf("Aluno: %s\nMatricula: %s\nSS:%d\nMS:%d\nMM:%d\nMI:%d\nII:%d\nSR:%d", aluno[i].NOME, aluno[i].MATRICULA, aluno[i].SS, aluno[i].MS, aluno[i].MM, aluno[i].MI, aluno[i].II, aluno[i].SR);
+            printf("Aluno: %s\nMatricula: %s\nIdade:%d\nTelefone:%s\nCelular:%s\nEndereco:%s\nIRA:%.4f", aluno[i].nome, aluno[i].matricula, aluno[i].idade, aluno[i].telefone, aluno[i].celular, aluno[i].endereco, aluno[i].ira);
             printf("\n\n\n");
         }
     }
     else
     {
         printf("Nenhum aluno foi cadastrado");
+    }
+    
+    getch();
+}
+
+void visualizar_professores()
+{
+    
+    int i;
+    system("cls");
+    
+    if(numero_professores>0)
+    {
+        for(i=0;i<numero_professores;i++)
+        {
+            printf("Professor: %s\nMatricula: %s\nIdade:%d\nTelefone:%s\nCelular:%s\nEndereco:%s", professor[i].nome, professor[i].matricula, professor[i].idade, professor[i].telefone, professor[i].celular, professor[i].endereco);
+            printf("\n\n\n");
+        }
+    }
+    else
+    {
+        printf("Nenhum professor foi cadastrado");
     }
     
     getch();
@@ -184,7 +265,7 @@ void excluir_aluno()
         //Laço de Repetição para mostrar alunos cadastrados
         for(i=0;i<numero_alunos;i++)
         {
-            printf("\nAluno %d:\t\t Nome:%s\t Matricula:%s", i+1, aluno[i].NOME, aluno[i].MATRICULA);
+            printf("\nAluno %d:\t\t Nome:%s\t Matricula:%s", i+1, aluno[i].nome, aluno[i].matricula);
         }
         
         //Escolha do aluno que sera excluido
@@ -192,7 +273,7 @@ void excluir_aluno()
         scanf("%d",&escolha_aluno);
         
         //Validação da entrada de dados
-        if((escolha_aluno>0)&&(escolha_aluno<=numero_alunos))
+        if((escolha_aluno>0) && (escolha_aluno<=numero_alunos))
         {
             printf("Deseja confirmar exclusao do aluno? (S/N): ");
             setbuf(stdin,NULL);
@@ -206,31 +287,16 @@ void excluir_aluno()
                 {
                     if(i >= escolha_aluno-1)
                     {
-                        strcpy(aluno[i].NOME,aluno[i+1].NOME);
-                        strcpy(aluno[i].MATRICULA,aluno[i+1].MATRICULA);
-                        aluno[i].SS = aluno[i+1].SS;
-                        aluno[i].MS = aluno[i+1].MS;
-                        aluno[i].MM = aluno[i+1].MM;
-                        aluno[i].MI = aluno[i+1].MI;
-                        aluno[i].II = aluno[i+1].II;
-                        aluno[i].SR = aluno[i+1].SR;
+                        strcpy(aluno[i].nome,aluno[i+1].nome);
+                        strcpy(aluno[i].matricula,aluno[i+1].matricula);
+                        aluno[i].idade = aluno[i+1].idade;
+                        strcpy(aluno[i].telefone,aluno[i+1].telefone);
+                        strcpy(aluno[i].celular,aluno[i+1].celular);
+                        strcpy(aluno[i].endereco,aluno[i+1].endereco);
+                        aluno[i].ira = aluno[i+1].ira;
                     }
                     
-                    //Abertura do arquivo para Escrita
-                    arquivo_alunos = fopen("alunos.txt","a+");
-                    
-                    //Exportar dados dos alunos para arquivo
-                    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].NOME);
-                    fprintf(arquivo_alunos,"%s\n",aluno[numero_alunos].MATRICULA);
-                    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].SS);
-                    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].MS);
-                    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].MM);
-                    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].MI);
-                    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].II);
-                    fprintf(arquivo_alunos,"%d\n",aluno[numero_alunos].SR);
-                    
-                    //Fechar arquivo
-                    fclose(arquivo_alunos);
+                    escrever_arquivo_aluno();
                 }
                 numero_alunos--;
                 fclose(arquivo_alunos);
@@ -251,64 +317,6 @@ void excluir_aluno()
     getch();
 }
 
-void cadastrar_professor(void)
-{
-    
-    system("CLS");
-    
-    ///Recebendo os dados
-    printf("\n\tCadastro de professor\n");
-    
-    printf("\nInsira o nome: ");
-    scanf("%s", professor[numero_professores].NOME);
-    setbuf(stdin,NULL);
-    
-    printf("\nInsira a matricula: ");
-    scanf("%s", professor[numero_professores].MATRICULA);
-    setbuf(stdin,NULL);
-    
-    ///Escrevendo em um arquivo
-    printf("\n\nArquivando Dados!");
-    
-    //Abertura do arquivo para Escrita
-    arquivo_professores = fopen("professores.txt","a+");
-    
-    //Exportar dados da turma para arquivo
-    fprintf(arquivo_professores,"%s\n",professor[numero_professores].NOME);
-    fprintf(arquivo_professores,"%s\n",professor[numero_professores].MATRICULA);
-    
-    //Fechar arquivo
-    fclose(arquivo_professores);
-    
-    numero_professores++;
-    
-    printf("\n\nDados Armazenado com sucesso!\nRetornando ao Menu - Professor!\n\n");
-    
-    getch();
-}
-
-void visualizar_professores(void)
-{
-    
-    int i;
-    system("cls");
-    
-    if(numero_professores>0)
-    {
-        for(i=0;i<numero_professores;i++)
-        {
-            printf("Professor: %s\nMatricula: %s", professor[i].NOME, professor[i].MATRICULA);
-            printf("\n\n\n");
-        }
-    }
-    else
-    {
-        printf("Nenhum professor foi cadastrado");
-    }
-    
-    getch();
-}
-
 //Funcao para excluir professor
 void excluir_professor()
 {
@@ -323,7 +331,7 @@ void excluir_professor()
         //Laço de Repetição para mostrar professores cadastrados
         for(i=0;i<numero_professores;i++)
         {
-            printf("\nProfessor %d:\t\t Nome:%s\t Matricula:%s", i+1, professor[i].NOME, professor[i].MATRICULA);
+            printf("\nProfessor %d:\t\t Nome:%s\t Matricula:%s", i+1, professor[i].nome, professor[i].matricula);
         }
         
         //Escolha do professor que sera excluido
@@ -345,19 +353,15 @@ void excluir_professor()
                 {
                     if(i >= escolha_professor-1)
                     {
-                        strcpy(professor[i].NOME,professor[i+1].NOME);
-                        strcpy(professor[i].MATRICULA,professor[i+1].MATRICULA);
+                        strcpy(professor[i].nome,professor[i+1].nome);
+                        strcpy(professor[i].matricula,professor[i+1].matricula);
+                        professor[i].idade = professor[i+1].idade;
+                        strcpy(professor[i].telefone,professor[i+1].telefone);
+                        strcpy(professor[i].celular,professor[i+1].celular);
+                        strcpy(professor[i].endereco,professor[i+1].endereco);
                     }
                     
-                    //Abertura do arquivo para Escrita
-                    arquivo_professores = fopen("professores.txt","a+");
-                    
-                    //Exportar dados dos professores para arquivo
-                    fprintf(arquivo_professores,"%s\n",professor[numero_professores].NOME);
-                    fprintf(arquivo_professores,"%s\n",professor[numero_professores].MATRICULA);
-                    
-                    //Fechar arquivo
-                    fclose(arquivo_professores);
+                    escrever_arquivo_professor();
                 }
                 numero_professores--;
                 fclose(arquivo_professores);
@@ -388,9 +392,11 @@ void menu_aluno()
         
         printf("\n\t\tC A D A S T R O - A L U N O");
         printf("\n\n\tOpcoes:\n");
-        printf("\t1 - Cadastrar alunos\n");
-        printf("\t2 - Visualizar cadastros\n");
-        printf("\t3 - Excluir aluno\n");
+        printf("\t1 - Incluir\n");
+        printf("\t2 - Consultar\n");
+        printf("\t3 - Alterar\n");
+        printf("\t4 - Excluir\n");
+        printf("\t5 - Listar\n");
         printf("\t6 - Retornar ao Menu Principal\n");
         printf("\n   Selecione uma letra: ");
         scanf("%d", &escolha);
@@ -399,66 +405,82 @@ void menu_aluno()
         switch(escolha)
         {
             case 1:
-                cadastrar_aluno();
+                incluir_aluno();
                 break;
             case 2:
-                visualizar_alunos();
+                consultar_aluno();
                 break;
-            case 'e':
-            case 'E':
+            case 3:
+                alterar_aluno();
+                break;
+            case 4:
                 excluir_aluno();
                 break;
+            case 5:
+                visualizar_alunos();
+                break;
+            case 6:
+                break;
             default:
+                printf("Opcao nao e valida! Digite um numero entre 1 e 6.");
                 break;
         }
         
-    }while(escolha != 0);
+    } while(escolha != 6);
     
 }
 
 void menu_professor()
 {
-    char escolha;
+    int escolha;
     do
     {
         system("cls");
         setbuf(stdin,NULL);
         
-        printf("\n\t\tM E N U - P R O F E S S O R");
+        printf("\n\t\tC A D A S T R O - P R O F E S S O R");
         printf("\n\n\tOpcoes:\n");
-        printf("\tC - Cadastrar professor\n");
-        printf("\tV - Visualizar cadastros\n");
-        printf("\tE - Excluir professor\n");
-        printf("\tR - Retornar ao Menu Principal\n");
-        printf("\n   Selecione uma letra: ");
-        scanf("%c", &escolha);
+        printf("\t1 - Incluir\n");
+        printf("\t2 - Consultar\n");
+        printf("\t3 - Alterar\n");
+        printf("\t4 - Excluir\n");
+        printf("\t5 - Listar\n");
+        printf("\t6 - Retornar ao Menu Principal\n");
+        printf("\n   Selecione uma opção: ");
+        scanf("%d", &escolha);
         setbuf(stdin,NULL);
         
         switch(escolha)
         {
-            case 'c':
-            case 'C':
-                cadastrar_professor();
+            case 1:
+                incluir_professor();
                 break;
-            case 'v':
-            case 'V':
-                visualizar_professores();
+            case 2:
+                consultar_professor();
                 break;
-            case 'e':
-            case 'E':
+            case 3:
+                alterar_professor();
+                break;
+            case 4:
                 excluir_professor();
                 break;
+            case 5:
+                visualizar_professores();
+                break;
+            case 6:
+                break;
             default:
+                printf("Opcao nao e valida! Digite um numero entre 1 e 6.");
                 break;
         }
         
-    }while(escolha != 'r' && escolha != 'R');
+    } while(escolha != 6);
     
 }
 
 int main()
 {
-    char ESCOLHA_MENU_PRINCIPAL;
+    int escolha_menu;
     
     //Chamada de funções para importar dados dos arquivos para structs
     importar_alunos();
@@ -469,22 +491,33 @@ int main()
         system("cls");
         printf("\n\t\tM E N U    P R I N C I P A L");
         printf("\n\n\tOpcoes:\n");
-        printf("\tA - Menu-Alunos\n");
-        printf("\tP - Menu-Professor\n");
-        printf("\tS - Sair\n");
+        printf("\t1 - Cadastro Alunos\n");
+        printf("\t2 - Cadastro Professor\n");
+        printf("\t3 - Cadastro Turma\n");
+        printf("\t4 - Sair\n");
         printf("\n   Selecione uma letra: ");
-        scanf("%c", &ESCOLHA_MENU_PRINCIPAL);
+        scanf("%d", &escolha_menu);
         setbuf(stdin,NULL);
         
-        switch(ESCOLHA_MENU_PRINCIPAL)
+        switch(escolha_menu)
         {
-            case 'A':menu_aluno(); break;
-            case 'a':menu_aluno(); break;
-            case 'P':menu_professor(); break;
-            case 'p':menu_professor(); break;
-            default: break;
+            case 1:
+                menu_aluno();
+                break;
+            case 2:
+                menu_professor();
+                break;
+            case 3:
+                menu_turma();
+                break;
+            case 4:
+                break;
+            default:
+                printf("Opcao nao e valida! Digite um numero entre 1 e 3.");
+                break;
         }
         
-    } while(ESCOLHA_MENU_PRINCIPAL != 'S' && ESCOLHA_MENU_PRINCIPAL != 's');
+    } while(escolha_menu != 3);
+    
     return 0;
 }
