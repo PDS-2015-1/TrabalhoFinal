@@ -59,7 +59,7 @@ void importar_alunos()
 {
     //Abertura do arquivo: "alunos.txt" para leitura e importação dos dados do arquivo
     arquivo_alunos=fopen("alunos.txt","rt");
-    if(arquivo_alunos!=NULL)
+    if(arquivo_alunos != NULL)
     {
         while(!feof(arquivo_alunos))
         {
@@ -136,6 +136,7 @@ void escrever_arquivo_professor()
     fclose(arquivo_professores);
 }
 
+//Função para incluir aluno no arquivo de alunos
 void incluir_aluno()
 {
     system("CLS");
@@ -196,6 +197,21 @@ void incluir_professor()
     scanf("%s", professor[numero_professores].matricula);
     setbuf(stdin,NULL);
     
+    printf("\nIdade: ");
+    scanf("%d", &professor[numero_professores].idade);
+    
+    printf("\nTelefone: ");
+    scanf("%s", professor[numero_professores].telefone);
+    setbuf(stdin,NULL);
+    
+    printf("\nCelular: ");
+    scanf("%s", professor[numero_professores].celular);
+    setbuf(stdin,NULL);
+    
+    printf("\nEndereco: ");
+    scanf("%s", professor[numero_professores].endereco);
+    setbuf(stdin,NULL);
+    
     ///Escrevendo em um arquivo
     printf("\n\nArquivando Dados!");
     
@@ -205,9 +221,34 @@ void incluir_professor()
     
     printf("\n\nDados Armazenado com sucesso!\nRetornando ao Menu - Professor!\n\n");
     
-    getch();
+    //getch();
 }
 
+//Função para consultar um aluno dentre os alunos cadastrados
+void consultar_aluno()
+{
+    
+}
+
+//Função para consultar um professor dentre os professores cadastrados
+void consultar_professor()
+{
+    
+}
+
+//Função para alterar um aluno dentre os alunos cadastrados
+void alterar_aluno()
+{
+    
+}
+
+//Função para alterar um professor dentre os professores cadastrados
+void alterar_professor()
+{
+    
+}
+
+//Função para listar todos alunos cadastrados
 void visualizar_alunos()
 {
     int i;
@@ -226,9 +267,10 @@ void visualizar_alunos()
         printf("Nenhum aluno foi cadastrado");
     }
     
-    getch();
+    //getch();
 }
 
+//Função para listar todos professores cadastrados
 void visualizar_professores()
 {
     
@@ -248,7 +290,7 @@ void visualizar_professores()
         printf("Nenhum professor foi cadastrado");
     }
     
-    getch();
+    //getch();
 }
 
 //Funcao para excluir aluno
@@ -314,7 +356,7 @@ void excluir_aluno()
         printf("Nao existem alunos cadastrados!");
     }
     
-    getch();
+    //getch();
 }
 
 //Funcao para excluir professor
@@ -379,9 +421,10 @@ void excluir_professor()
         printf("Nao existem professores cadastrados!");
     }
     
-    getch();
+    //getch();
 }
 
+//Visualizar opcoes do menu de aluno
 void menu_aluno()
 {
     int escolha;
@@ -430,6 +473,7 @@ void menu_aluno()
     
 }
 
+//Visualizar opcoes do menu de professor
 void menu_professor()
 {
     int escolha;
@@ -466,6 +510,55 @@ void menu_professor()
                 break;
             case 5:
                 visualizar_professores();
+                break;
+            case 6:
+                break;
+            default:
+                printf("Opcao nao e valida! Digite um numero entre 1 e 6.");
+                break;
+        }
+        
+    } while(escolha != 6);
+    
+}
+
+//Visualizar opcoes do menu de turma
+void menu_turma()
+{
+    int escolha;
+    do
+    {
+        system("cls");
+        setbuf(stdin,NULL);
+        
+        printf("\n\t\tC A D A S T R O - T U R M A");
+        printf("\n\n\tOpcoes:\n");
+        printf("\t1 - Incluir\n");
+        printf("\t2 - Consultar\n");
+        printf("\t3 - Alterar\n");
+        printf("\t4 - Excluir\n");
+        printf("\t5 - Listar\n");
+        printf("\t6 - Retornar ao Menu Principal\n");
+        printf("\n   Selecione uma opção: ");
+        scanf("%d", &escolha);
+        setbuf(stdin,NULL);
+        
+        switch(escolha)
+        {
+            case 1:
+                //incluir_professor();
+                break;
+            case 2:
+                //consultar_professor();
+                break;
+            case 3:
+                //alterar_professor();
+                break;
+            case 4:
+                //excluir_professor();
+                break;
+            case 5:
+                //visualizar_professores();
                 break;
             case 6:
                 break;
@@ -517,7 +610,7 @@ int main()
                 break;
         }
         
-    } while(escolha_menu != 3);
+    } while(escolha_menu != 4);
     
     return 0;
 }
